@@ -1,0 +1,164 @@
+*Chapter 4 code for figures.
+*.
+*The data in this chapter consist of prices of used Toyota Corollas
+* in the Netherlands around the year 2004.
+* Note that the syntax below is illustrating several different ideas.
+* It should be runable as one stream. You will need to change the
+* full windows names of the files to make them apply to your local machine.  
+GET
+  FILE='C:\Users\Tony\Documents\KSBSPSSBOOK_DATA\chapter4\toyotacorolla.sav'.
+DATASET NAME DataSet1 WINDOW=FRONT.
+*.
+*Figure 1 code (histogram) and Figure 2 code (percentiles). 
+FREQUENCIES VARIABLES=Price
+  /FORMAT=NOTABLE
+  /PERCENTILES=1.0 5.0 10.0 25.0 50.0 75.0 90.0 95.0 99.0 
+  /STATISTICS=MINIMUM MAXIMUM
+  /HISTOGRAM
+  /ORDER=ANALYSIS.
+*.
+*Figure 3 code-save zscores, then display them in the Data Window. 
+* The Data Window shows a split screen. There are various ways to produce
+* this. One way is via the Window menu -- Window -> Split. Then adjust the view
+* via the mouse. 
+DESCRIPTIVES VARIABLES=Price
+  /SAVE
+  /STATISTICS=MEAN STDDEV MIN MAX.  
+*.
+*Figure 4 code (Extreme values table) and Figure 5 code (boxplot). 
+EXAMINE VARIABLES=Price
+  /PLOT BOXPLOT
+  /COMPARE GROUPS
+  /STATISTICS DESCRIPTIVES EXTREME
+  /CINTERVAL 95
+  /MISSING LISTWISE
+  /NOTOTAL.
+*.
+*Different data. Simulated data with a multivariate outlier.
+GET
+  FILE='C:\Users\Tony\Documents\KSBSPSSBOOK_DATA\chapter4\moutlier\data101.sav'.
+DATASET NAME DataSet2 WINDOW=FRONT.
+*Figure 6 code. The chapter does not show the syntax, but it shows the chart
+* produced by the code below.
+*.
+DATASET ACTIVATE DataSet2.
+* Chart Builder.
+GGRAPH
+  /GRAPHDATASET NAME="graphdataset" VARIABLES=y1 y2 MISSING=LISTWISE REPORTMISSING=NO
+  /GRAPHSPEC SOURCE=INLINE.
+BEGIN GPL
+  SOURCE: s=userSource(id("graphdataset"))
+  DATA: y1=col(source(s), name("y1"))
+  DATA: y2=col(source(s), name("y2"))
+  GUIDE: axis(dim(1), label("y1"))
+  GUIDE: axis(dim(2), label("y2"))
+  ELEMENT: point(position(y1*y2))
+END GPL.
+*.
+*Code to generate the mahalanobis distance. The SPSS "trick" here is that the 
+* distances are derived using only the regression inputs, while the regression
+* target variable is irrelevant. 
+set seed 12345.
+compute dependent=rv.normal(0,1).
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10)
+  /NOORIGIN 
+  /DEPENDENT dependent
+  /METHOD=ENTER y1 y2
+  /SAVE MAHAL(mahal2vars).
+*.
+*Inspection of the data window shows that observations #57 and #101 have the 
+* two largest Mahalanobis distance values which also exceed the critical values
+* of 9.21. You can generate the Y1-Y2 scatterplot and then double-click to 
+* edit it and label the two indicated points with the CASEID value.
+*Code for Figure 7--Must edit the chart in Chart Editor using Data Label Mode.
+GGRAPH
+  /GRAPHDATASET NAME="graphdataset" VARIABLES=y1 y2 MISSING=LISTWISE REPORTMISSING=NO
+  /GRAPHSPEC SOURCE=INLINE.
+BEGIN GPL
+  SOURCE: s=userSource(id("graphdataset"))
+  DATA: y1=col(source(s), name("y1"))
+  DATA: y2=col(source(s), name("y2"))
+  GUIDE: axis(dim(1), label("y1"))
+  GUIDE: axis(dim(2), label("y2"))
+  ELEMENT: point(position(y1*y2))
+END GPL.
+*.
+*Figure 8 code. The code is not shown in the chapter, but run it to produce
+* the Q-Q plot. 
+PPLOT
+  /VARIABLES=mahal2vars
+  /NOLOG
+  /NOSTANDARDIZE
+  /TYPE=Q-Q
+  /FRACTION=BLOM
+  /TIES=MEAN
+  /DIST=CHI(2).
+*.
+*Different data for the missing values portion of the chapter. We turn
+* to a subset of the GSS2014 data. 
+GET
+  FILE='C:\Users\Tony\Documents\KSBSPSSBOOK_DATA\chapter4\gssmissing\GSSExtractch42014.sav'.
+DATASET NAME DataSet3 WINDOW=FRONT.
+*.
+*Figure 9 code. Run Frequencies, inspect the Statistics table. In the chapter,
+* we post-processed the table by editing and transposing. In the Chart Editor,
+* go to the Pivot menu and find the Transpose selection. 
+FREQUENCIES VARIABLES=AGE SEX RACE EDUC PAEDUC MAEDUC SPEDUC MARITAL
+  /ORDER=ANALYSIS.  
+*.
+*Figure 10 code. 
+DESCRIPTIVES VARIABLES=AGE EDUC PAEDUC MAEDUC SPEDUC
+  /STATISTICS=MEAN STDDEV MIN MAX.
+*.
+*Figure 11 code.
+DESCRIPTIVES VARIABLES=EDUC PAEDUC MAEDUC SPEDUC
+  /STATISTICS=MEAN STDDEV MIN MAX. 
+*.
+*Data window with only ID and the 4 Education variables. 
+*Figure 12 is just a snapshot of a portion of this data window.
+GET
+  FILE='C:\Users\Tony\Documents\KSBSPSSBOOK_DATA\chapter4\gssmissing\GSSExtractch42014educvars.sav'.    
+DATASET NAME DataSet4 WINDOW=FRONT.  
+*.
+*Figure 13 code. Figure 13 shows the data window with the added fields.
+* Use screen split to limit the number of columns-focus on the added fields. 
+IF MISSING(EDUC)=1 EDUC_MIS=1.
+IF MISSING(EDUC)=0 EDUC_MIS=0.
+IF MISSING(PAEDUC)=1 PAEDUC_MIS=1.
+IF MISSING(PAEDUC)=0 PAEDUC_MIS=0.
+IF MISSING(MAEDUC)=1 MAEDUC_MIS=1.
+IF MISSING(MAEDUC)=0 MAEDUC_MIS=0.
+IF MISSING(SPEDUC)=1 SPEDUC_MIS=1.
+IF MISSING(SPEDUC)=0 SPEDUC_MIS=0.
+FORMATS EDUC_MIS TO SPEDUC_MIS(F1.0).
+EXECUTE.
+*. 
+*Write out an aggregrated file as an external file. 
+* Figure 14 shows the data in the Data Window. 
+AGGREGATE
+  /OUTFILE=
+    'C:\Users\Tony\Documents\KSBSPSSBOOK_DATA\chapter4\gssmissing\GSSExtractch42014educvarsAGG.sav'
+  /BREAK=EDUC_MIS PAEDUC_MIS MAEDUC_MIS SPEDUC_MIS
+  /frequency=N.
+GET
+  FILE=
+    'C:\Users\Tony\Documents\KSBSPSSBOOK_DATA\chapter4\gssmissing\GSSExtractch42014educvarsAGG.sav'.
+DATASET NAME DataSet5 WINDOW=FRONT.
+*.
+*Make Dataset3 the active file for the final figures. 
+DATASET ACTIVATE DataSet3.
+*Figure 15 code. 
+DESCRIPTIVES VARIABLES=AGE
+  /STATISTICS=MEAN STDDEV MIN MAX.
+*.
+*Figure 16 code.
+RMV /AGE_imp=SMEAN(AGE).  
+*.
+*Figure 17 code.
+DESCRIPTIVES VARIABLES=AGE AGE_imp
+  /STATISTICS=MEAN STDDEV MIN MAX.
+
+

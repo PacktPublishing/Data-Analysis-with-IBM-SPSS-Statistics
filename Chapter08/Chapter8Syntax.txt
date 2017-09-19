@@ -1,0 +1,99 @@
+***************************.
+***(1) One-to-many merge***.
+***************************.
+*Uses two files from Northwind database.
+*Figures 1,2,3 are snapshots of the two Northwind source files and the merged file.
+*.
+*Make sure that the two files are open(Orders, then Customers) and that the cases are sorted by ID.
+*Make Customers file active. File is already sorted.
+DATASET ACTIVATE DataSet2.
+DATASET NAME Customers.
+*.
+*Make Orders file active.
+DATASET ACTIVATE DataSet1.
+SORT CASES BY Customer_ID(A) Order_Date(A).
+DATASET NAME Orders.
+*.
+STAR JOIN
+  /SELECT t0.Order_ID, t0.Shipper_ID, t0.Order_Date, t0.Shipped_Date, t1.First_Name, t1.Last_Name, 
+     t1.Company, t1.Address, t1.City, t1.State_Province, t1.ZIP_Postal_Code
+  /FROM * AS t0
+  /JOIN 'Customers' AS t1
+    ON t0.Customer_ID=t1.ID
+  /OUTFILE FILE=*.
+*.
+SAVE OUTFILE='C:\Users\tbabinec\Documents\KSBSPSSBOOK_DATA\chapter8\NorthwindTables\Orders_and_Customers.sav'
+ /COMPRESSED.
+DATASET NAME OrdersandCustomers.
+*.
+*alternate syntax for Merge.
+*Make sure that the two files are open(Orders, then Customers) and that the cases are sorted by ID.
+*Make Customers file active. File is already sorted.
+DATASET ACTIVATE DataSet2.
+DATASET NAME Customers.
+RENAME VARIABLES (ID=Customer_ID).
+*Make Orders file active.
+DATASET ACTIVATE DataSet1.
+SORT CASES BY Customer_ID(A) Order_Date(A).
+DATASET NAME Orders.
+*Do the match.
+MATCH FILES FILE=*/TABLE='Customers'/BY Customer_ID.
+EXECUTE.
+*.
+**************************.
+***(2) One-to-one merge***.
+**************************.
+*Figures 4,5,6 are snapshots of the two tiny GSS source files and the merged file.
+MATCH FILES /FILE=*
+  /FILE='DataSet2'
+  /BY id.
+EXECUTE.
+SAVE OUTFILE='C:\Users\tbabinec\Documents\KSBSPSSBOOK_DATA\chapter8\GSS2016f1andf2Outer.sav'
+  /COMPRESSED.
+DATASET NAME f1andf2Outer.  
+*.
+*******************.
+***(3) ADD FILES***.
+*******************.
+*Figures 7 and 8 are snapshots of the two (2014,2016)source files.
+*Figure 9 is a snapshot of the CROSSTABS table. 
+DATASET ACTIVATE DataSet2.
+COMPUTE ID=ID+160000.
+FORMATS ID(F8).
+EXECUTE.
+
+DATASET ACTIVATE DataSet1.
+COMPUTE ID=ID+140000.
+FORMATS ID(F8).
+EXECUTE.
+RECODE SEX ('m'=1) ('f'=2) INTO SEXN.
+FORMATS SEXN(f8).
+EXECUTE.
+DELETE VARIABLES SEX.
+RENAME VARIABLES (SEXN=SEX).
+VALUE LABELS SEX 1 'Male' 2 'Female'.
+
+ADD FILES /FILE=*
+  /FILE='DataSet2'
+  /IN=source
+  /DROP=cappun childs degree educ hapmar incom16 natchld NATENRGY natmass natpark natroad natsci 
+    partyid polviews PRES12 region res16 RINCOM16 satfin size spdeg speduc VOTE12 wrkstat.
+VARIABLE LABELS source
+ ' '.
+VALUE LABELS source 0 '2014' 1 '2016'.
+FORMATS source(f8).
+EXECUTE.
+DATASET NAME Combined2014and2016.
+CROSSTABS
+  /TABLES=HAPPY BY source
+  /FORMAT=AVALUE TABLES
+  /CELLS=COUNT COLUMN 
+  /COUNT ROUND CELL.
+
+
+
+
+
+
+
+

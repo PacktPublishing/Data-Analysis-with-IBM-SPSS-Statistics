@@ -1,0 +1,129 @@
+*Chapter 2 code for figures.
+*Since Chapter 2 is an early chapter, it shows some snapshots
+* of SPSS menus. Since menus feature a PASTE button, you can
+* paste syntax and then run it.
+* NOTE that the chapter has several topic, and the syntax below
+* is not supposed to be one job stream. 
+*.
+*Figure 1-a snapshot of the Excel file viewed in Excel.
+*.
+*Figure 2-demonstrates File -> Import of an Excel spreadsheet.
+* Paste syntax.
+*.
+*Figure 3-run the syntax below and view the data window. 
+* Resize the column for SEX(make it wider). 
+GET DATA
+  /TYPE=XLSX
+  /FILE='C:\Users\Tony\Documents\KSBSPSSBOOK_DATA\chapter2\gss2014\gss2014extract.xlsx'                                                                                                        
+  /SHEET=name 'gss2014extract'
+  /CELLRANGE=FULL
+  /READNAMES=ON
+  /DATATYPEMIN PERCENTAGE=95.0
+  /HIDDEN IGNORE=YES.
+EXECUTE.
+DATASET NAME DataSet1 WINDOW=FRONT.
+*.
+*Figure 4-a snapshot of the first 10 rows of the CSV file viewed in Notepad. 
+*.
+*Figure 5-demonstrates File -> Import Data to read a CSV file.
+* Paste syntax.
+PRESERVE.
+SET DECIMAL DOT.
+GET DATA  /TYPE=TXT
+  /FILE="C:UsersTonyDocumentsKSBSPSSBOOK_DATAchapter2gss2014gss2014extract.csv"
+  /ENCODING='UTF8'
+  /DELIMITERS=","
+  /QUALIFIER='"'
+  /ARRANGEMENT=DELIMITED
+  /FIRSTCASE=2
+  /DATATYPEMIN PERCENTAGE=95.0
+  /VARIABLES=
+  ID AUTO
+  MARITAL AUTO
+  AGE AUTO
+  HAPPY AUTO
+  sex AUTO
+  /MAP.
+RESTORE.
+CACHE.
+EXECUTE.
+DATASET NAME DataSet1 WINDOW=FRONT.
+*.
+*Figure 6-Start in a Data Window after having opened either the XLSX or
+* CSV file. Specify File -> Save As. Paste the syntax. 
+SAVE OUTFILE='C:\Users\Tony\Documents\KSBSPSSBOOK_DATA\chapter2\gss2014\myfile.sav'
+  /COMPRESSED.
+*.
+*Figure 7-demonstrates File -> Open -> Data to read a SAV file. Paste the syntax.
+GET
+ FILE='C:\Users\Tony\Documents\KSBSPSSBOOK_DATA\chapter2\gss2014\gss2014extract170113.sav'.
+DATASET NAME DataSet1 WINDOW=FRONT.
+*.
+*Figure 8-syntax for figure 8--frequency table for MARITAL and other variables.
+FREQUENCIES VARIABLES=MARITAL AGE HAPPY SEX
+  /ORDER=ANALYSIS.
+*.  
+*Figure 9-With the Data Window containing the GSS extract, click on Variable View
+* in lower left corner. In the ID row, click in the Type column. 
+*.
+*Figure 10-In that same Variable View, click in the Values column in any of the rows. 
+*.
+*Figure 11-In that same Variable View, click in the Missing column in any of the rows. 
+*.
+*Figure 12. Use commands to specify Variable Properties. 
+* Place commands in Syntax window.
+VARIABLE LABELS
+   ID       "Respondent id number"
+   MARITAL  "Marital status"
+   AGE      "Age of respondent"
+   SEX      "Respondents sex"
+   HAPPY    "General happiness"
+.
+VALUE LABELS
+  MARITAL
+      1        "Married"
+      2        "Widowed"
+      3        "Divorced"
+      4        "Separated"
+      5        "Never married"  
+      9        "No answer"
+ / AGE
+      89       "89 or older"
+      98       "Don't know"
+      99       "No answer" 
+ / SEX
+      'f'       "Female"
+      'm'       "Male"
+ / HAPPY
+      1        "Very happy"
+      2        "Pretty happy"
+      3        "Not too happy"
+      0        "Not applicable"
+      8        "Don't know"
+      9        "No answer"
+.
+MISSING VALUES
+ MARITAL(9)
+ / AGE(98,99)
+ / HAPPY(0,8,9)
+.
+VARIABLE LEVEL
+ ID,AGE(SCALE)
+ / HAPPY(ORDINAL)
+ / MARITAL(NOMINAL)  
+.
+FREQUENCIES VARIABLES=MARITAL AGE HAPPY SEX
+  /ORDER=ANALYSIS.
+*.
+*Figure 13-This is an alternative to the use of the immediate commands above. 
+* Therefore, start with a new SPSS session and open the SAV file again. 
+GET
+ FILE='C:\Users\Tony\Documents\KSBSPSSBOOK_DATA\chapter2\gss2014\gss2014extract170113.sav'.
+DATASET NAME DataSet1 WINDOW=FRONT.
+*Next, from the menus specify Data -> Define Variable Properties.
+* In the Define Variable Properties box, move MARITAL to the Variables to Scan box.
+* This is Figure 13. 
+*For Figure 14, press Continue. 
+*.
+*For Figure 15, fill in labels, make sure that Changed and Missing boxes are checked. 
+* Paste the syntax. 

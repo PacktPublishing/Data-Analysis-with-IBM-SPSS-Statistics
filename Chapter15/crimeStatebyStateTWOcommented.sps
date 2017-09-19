@@ -1,0 +1,27 @@
+GET
+  FILE='C:\Users\tbabinec\Documents\KSBSPSSBOOK_DATA\ChapterCluster\CrimeStatebyStateTWO.sav'.
+DATASET NAME DataSet1 WINDOW=FRONT.
+*.
+*Figure 24-First TWOSTEP run is only used to obtain Figure 24.
+TWOSTEP CLUSTER
+  /CONTINUOUS VARIABLES=MurderR RRapeR RobberyR AssaultR BurglaryR LarcenyR VehicleTheftR
+  /DISTANCE LIKELIHOOD
+  /NUMCLUSTERS AUTO 15 BIC
+  /HANDLENOISE 0
+  /MEMALLOCATE 64
+  /CRITERIA INITHRESHOLD(0) MXBRANCH(8) MXLEVEL(3)
+  /VIEWMODEL DISPLAY=YES
+  /PRINT IC COUNT SUMMARY.  
+*.
+*Figures 25-33 produced in second TWOSTEP run.
+* you have to activate the Model Viewer output and tweak the dropbar settings.
+TWOSTEP CLUSTER
+  /CONTINUOUS VARIABLES=MurderR RRapeR RobberyR AssaultR BurglaryR LarcenyR VehicleTheftR
+  /DISTANCE LIKELIHOOD
+  /NUMCLUSTERS FIXED=3
+  /HANDLENOISE 0
+  /MEMALLOCATE 64
+  /CRITERIA INITHRESHOLD(0) MXBRANCH(8) MXLEVEL(3)
+  /VIEWMODEL DISPLAY=YES
+  /PRINT IC COUNT SUMMARY
+  /SAVE VARIABLE=TSC_3clusters.  

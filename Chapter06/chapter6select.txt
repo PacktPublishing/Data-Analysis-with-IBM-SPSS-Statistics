@@ -1,0 +1,128 @@
+*Chapter 6 - Initial code reads the data file.
+GET
+  FILE='C:\Users\tbabinec\Documents\KSBSPSSBOOK_DATA\GSS2016\GSS2016sm28 40317.sav'.
+DATASET NAME DataSet1 WINDOW=FRONT.
+DATASET ACTIVATE DataSet1.
+*.
+*Figure 1 comes from the menus: DATA > SELECT CASES.
+*.
+*Code for figure 2. 
+USE ALL.
+COMPUTE filter_$=(childs = 0).
+VARIABLE LABELS filter_$ 'childs = 0 (FILTER)'.
+VALUE LABELS filter_$ 0 'Not Selected' 1 'Selected'.
+FORMATS filter_$ (f1.0).
+FILTER BY filter_$.
+EXECUTE.
+
+FREQUENCIES VARIABLES=childs
+  /ORDER=ANALYSIS.
+*.
+*Code for figure 3.
+SHOW FILTER.
+*.
+*Figure 4 is just a snapshot of the SPSS Viewer window.
+*Likewise, Figure 5 is a snapshot of the open Notes table.
+*Likewise, Figure 6 is a snapshot of the Data Editor window with Filtering in effect.
+*.
+*The following code un-does the filtering and reverts to all cases selected.
+FILTER OFF.
+USE ALL.
+EXECUTE.
+*.
+*Code for Figure 7-The following code sets up case selection + copy to new dataset.
+DATASET COPY  ChildEQ0.
+DATASET ACTIVATE  ChildEQ0.
+FILTER OFF.
+USE ALL.
+SELECT IF (childs = 0).
+EXECUTE.
+DATASET ACTIVATE  DataSet1.
+*.
+*Code for Select If combined with deletion of unselected cases.
+FILTER OFF.
+USE ALL.
+SELECT IF (childs = 0).
+EXECUTE.
+
+*.
+*The chapter shows syntax for TEMPORARY but I do not show any figures.
+*block 1.
+TEMPORARY.
+SELECT IF (childs = 0).
+FREQUENCIES VAR=childs.
+FREQUENCIES VAR=childs.
+*block 2.
+TEMPORARY.
+SELECT IF (childs = 0).
+FREQUENCIES VAR=childs.
+TEMPORARY.
+SELECT IF (childs = 1).
+FREQUENCIES VAR=childs.
+*block 3.
+SELECT IF (childs = 0).
+FREQUENCIES VAR=childs.
+SELECT IF (childs = 1).
+FREQUENCIES VAR=childs.
+*.
+*Code for Figure 10 - select time or case range. 
+FILTER OFF.
+USE 1 thru 10.
+EXECUTE.
+
+FILTER OFF.
+USE ALL.
+EXECUTE.
+
+*sample-the code produces figures 8 and 9. I moved SAMPLE after case selection. 
+DESCRIPTIVES VARIABLES=age
+  /STATISTICS=MEAN STDDEV MIN MAX.
+FILTER OFF.
+USE ALL.
+SAMPLE  .30.
+DESCRIPTIVES VARIABLES=age
+  /STATISTICS=MEAN STDDEV MIN MAX.
+  
+*split file processing.
+*
+DESCRIPTIVES VARIABLES=age educ size
+  /STATISTICS=MEAN STDDEV MIN MAX.
+  
+*Figure 12.  
+SORT CASES  BY VOTE12.
+SPLIT FILE LAYERED BY VOTE12.
+DESCRIPTIVES VARIABLES=age educ size
+  /STATISTICS=MEAN STDDEV MIN MAX. 
+
+*Figure 13.  
+SORT CASES  BY VOTE12.
+SPLIT FILE SEPARATE BY VOTE12.
+DESCRIPTIVES VARIABLES=age educ size
+  /STATISTICS=MEAN STDDEV MIN MAX.  
+  
+*WEIGHT example.
+*Figure 14 and Figure 15 come from the two CROSSTABS commands. 
+data list / freq 1 row 3 column 5.
+begin data.
+6 1 1
+4 1 2
+4 2 1
+6 2 2
+end data. 
+weight by freq.
+CROSSTABS
+  /TABLES=row BY column
+  /FORMAT=AVALUE TABLES
+  /STATISTICS=CHISQ 
+  /CELLS=COUNT
+  /COUNT ROUND CELL.
+compute freq2=10*freq.
+weight by freq2.
+CROSSTABS
+  /TABLES=row BY column
+  /FORMAT=AVALUE TABLES
+  /STATISTICS=CHISQ 
+  /CELLS=COUNT
+  /COUNT ROUND CELL.  
+  
+  

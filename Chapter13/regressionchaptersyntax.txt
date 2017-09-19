@@ -1,0 +1,122 @@
+*commands for regression chapter.
+*read the data file.
+GET
+  FILE='C:\Users\tbabinec\Documents\KSBSPSSBOOK_DATA\chapter13Reg\mtcars.sav'.
+*Figure 1.
+*commands for scatter of mpq with displacement.
+* Add loess line by double-clicking to edit chart in Chart Editor.
+GGRAPH
+  /GRAPHDATASET NAME="graphdataset" VARIABLES=disp mpg MISSING=LISTWISE REPORTMISSING=NO
+  /GRAPHSPEC SOURCE=INLINE.
+BEGIN GPL
+  SOURCE: s=userSource(id("graphdataset"))
+  DATA: disp=col(source(s), name("disp"))
+  DATA: mpg=col(source(s), name("mpg"))
+  GUIDE: axis(dim(1), label("Displacement (cu.in.)"))
+  GUIDE: axis(dim(2), label("Miles/(US) gallon"))
+  ELEMENT: point(position(disp*mpg))
+END GPL.
+*.
+*compute new variables.
+COMPUTE gpm=1 / mpg.
+COMPUTE gpm100=100*gpm.
+EXECUTE.
+*.
+*Figure 2 -- source code for figure 2 plot.
+* Chart Builder-plot GPM VS DISP.
+* Post-process chart to add linear fit line. 
+GGRAPH
+  /GRAPHDATASET NAME="graphdataset" VARIABLES=disp gpm MISSING=LISTWISE REPORTMISSING=NO
+  /GRAPHSPEC SOURCE=INLINE.
+BEGIN GPL
+  SOURCE: s=userSource(id("graphdataset"))
+  DATA: disp=col(source(s), name("disp"))
+  DATA: gpm=col(source(s), name("gpm"))
+  GUIDE: axis(dim(1), label("Displacement (cu.in.)"))
+  GUIDE: axis(dim(2), label("gpm"))
+  ELEMENT: point(position(disp*gpm))
+END GPL.
+*Figure 3 -- corr.
+* postprocess with pivot table editor to obtain correlations only, and isolate the first column. 
+CORRELATIONS
+  /VARIABLES=gpm cyl disp hp drat wt qsec vs am gear carb
+  /PRINT=TWOTAIL NOSIG
+  /MISSING=PAIRWISE.
+*.
+*.
+*Figure 4 -- Chart Builder-plot of GPM100 VS WT. 
+* post-process the chart in the Chart Editor to add the linear regression line. 
+GGRAPH
+  /GRAPHDATASET NAME="graphdataset" VARIABLES=wt gpm100 MISSING=LISTWISE REPORTMISSING=NO
+  /GRAPHSPEC SOURCE=INLINE.
+BEGIN GPL
+  SOURCE: s=userSource(id("graphdataset"))
+  DATA: wt=col(source(s), name("wt"))
+  DATA: gpm100=col(source(s), name("gpm100"))
+  GUIDE: axis(dim(1), label("Weight (1000 lbs)"))
+  GUIDE: axis(dim(2), label("gpm100"))
+  ELEMENT: point(position(wt*gpm100))
+END GPL.
+*Figure 5 thru 8 -- simple regression tables.
+*simple regression-produces 4 tables by default.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10)
+  /NOORIGIN 
+  /DEPENDENT gpm100
+  /METHOD=ENTER wt.
+*Figure 9 - 11.
+*simple regression with plots-3 plots produced. 
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10)
+  /NOORIGIN 
+  /DEPENDENT gpm100
+  /METHOD=ENTER wt
+  /SCATTERPLOT=(*ZRESID ,*ZPRED)
+  /RESIDUALS HISTOGRAM(ZRESID) NORMPROB(ZRESID).  
+*Figure 12.
+*simple regression with added residuals columns.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10)
+  /NOORIGIN 
+  /DEPENDENT gpm100
+  /METHOD=ENTER wt
+  /SAVE RESID SRESID DRESID SDRESID LEVER COOK.
+* Inspection of residuals shows that row with code 'Q' has most extreme point.
+* Here use select cases with copy to new dataset to isolate that point.  
+DATASET COPY  Q.
+DATASET ACTIVATE  Q.
+FILTER OFF.
+USE ALL.
+SELECT IF (code='Q').
+EXECUTE.
+DATASET ACTIVATE Q.
+SUMMARIZE
+  /TABLES=model gpm100 wt RES_1 SRE_1 SDR_1 LEV_1 COO_1
+  /FORMAT=LIST NOCASENUM TOTAL
+  /TITLE='Case Summaries'
+  /MISSING=VARIABLE
+  /CELLS=COUNT.  
+*Figure 13 repeats the plot of gpm100 versus wt.
+*Figure 14 -- derive variable and obtain correlations. 
+COMPUTE hp_wt=hp / wt.
+CORRELATIONS
+  /VARIABLES=gpm100 wt hp_wt
+  /PRINT=TWOTAIL NOSIG
+  /MISSING=PAIRWISE.  
+*Figure 15-19.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10)
+  /NOORIGIN
+  /DEPENDENT gpm100
+  /METHOD=ENTER wt hp_wt
+  /PARTIALPLOT ALL
+  /SCATTERPLOT=(*ZRESID ,*ZPRED)
+  /RESIDUALS HISTOGRAM(ZRESID) NORMPROB(ZRESID).

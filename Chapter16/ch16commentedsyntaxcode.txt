@@ -1,0 +1,147 @@
+*Figure 1 code. First, read the data. Second, produce a table of means.
+* To produce the final table, you must edit the original table in the
+  pivot table editor and transpose it. In the chapter, I did not show
+  the code, only the pivoted table. 
+GET
+  FILE='C:\Users\tbabinec\Documents\KSBSPSSBOOK_DATA\chapter_discrim\wine.sav'.
+DATASET NAME DataSet1 WINDOW=FRONT.
+DATASET ACTIVATE DataSet1.
+MEANS TABLES=Alcohol Malic_Acid Ash Ash_Alcalinity Magnesium Total_Phenols Flavanoids 
+    Nonflavanoid_Phenols Proanthocyanins Color_Intensity Hue Dilution Proline BY Type
+  /CELLS=MEAN.
+*.
+*Figure 2 code. Again, the chapter does not show the code, only the resulting chart.
+* The chart was post-processed in the Chart Editor:
+* -change the ugly gray color for wine type 3 to red,
+* -change the marker size to the smallest size(3). 
+* Chart Builder.
+GGRAPH
+  /GRAPHDATASET NAME="graphdataset" VARIABLES=Type Alcohol Malic_Acid Ash Ash_Alcalinity Magnesium 
+    MISSING=LISTWISE REPORTMISSING=NO
+  /GRAPHSPEC SOURCE=INLINE.
+BEGIN GPL
+  SOURCE: s=userSource(id("graphdataset"))
+  DATA: Type=col(source(s), name("Type"), unit.category())
+  DATA: Alcohol=col(source(s), name("Alcohol"))
+  DATA: Malic_Acid=col(source(s), name("Malic_Acid"))
+  DATA: Ash=col(source(s), name("Ash"))
+  DATA: Ash_Alcalinity=col(source(s), name("Ash_Alcalinity"))
+  DATA: Magnesium=col(source(s), name("Magnesium"))
+  GUIDE: axis(dim(1.1), ticks(null()))
+  GUIDE: axis(dim(2.1), ticks(null()))
+  GUIDE: axis(dim(1), gap(0px))
+  GUIDE: axis(dim(2), gap(0px))
+  GUIDE: legend(aesthetic(aesthetic.color.exterior), label("Type"))
+  TRANS: Alcohol_label = eval("Alcohol")
+  TRANS: Malic_Acid_label = eval("Malic_Acid")
+  TRANS: Ash_label = eval("Ash")
+  TRANS: Ash_Alcalinity_label = eval("Ash_Alcalinity")
+  TRANS: Magnesium_label = eval("Magnesium")
+  ELEMENT: point(position((Alcohol/Alcohol_label+Malic_Acid/Malic_Acid_label+Ash/Ash_label+
+    Ash_Alcalinity/Ash_Alcalinity_label+Magnesium/Magnesium_label)*(Alcohol/Alcohol_label+
+    Malic_Acid/Malic_Acid_label+Ash/Ash_label+Ash_Alcalinity/Ash_Alcalinity_label+
+    Magnesium/Magnesium_label)),color.exterior(Type))
+END GPL.
+*.
+*The following code leads to a lot of the subsequent figures.
+* Figure 3 - Analysis case processing summary.
+* Figure 4 - Tests of Equality of Group Means. 
+* Figure 5 - Box's test of equality of covariance matrices.
+* Figure 6 - Summary of Canonical Discriminant Functions.
+* Figure 7 - Standardized Canonical Discriminant Function Coefficients.
+* Figure 8 - Structure Matrix.
+* Figure 9 - Canonical Discriminant Function Coefficients.
+* Figure 10 - Functions at Group Centroids.
+* Figure 11 - Prior Probabilities for Groups. 
+* Figure 12 - Classification Function Coefficients. 
+* Figure 13 - Classification Results.
+DISCRIMINANT
+ /GROUPS=Type(1 3)
+ /VARIABLES=Alcohol Malic_Acid Ash Ash_Alcalinity 
+ Magnesium Total_Phenols Flavanoids Nonflavanoid_Phenols 
+ Proanthocyanins Color_Intensity Hue Dilution Proline
+ /ANALYSIS ALL
+ /SAVE=CLASS SCORES PROBS
+ /PRIORS SIZE
+ /STATISTICS=UNIVF BOXM COEFF RAW TABLE CROSSVALID
+ /PLOT=MAP
+ /CLASSIFY=NONMISSING POOLED.
+*.
+*Figure 14 is just a split-screen snapshot of the Data Window with the added fields from Discriminant. 
+*.
+*Figure 15 is a scatterplot of discriminant score 1 versus discriminant score 2 with Type overlayed.
+* Since the classification is so good, either Type or predicted Type could be used. I did not show
+* the syntax, only the result. Again, post-process the chart to change color for Type 3.
+* Chart Builder.
+GGRAPH
+  /GRAPHDATASET NAME="graphdataset" VARIABLES=Dis1_1 Dis2_1 Type MISSING=LISTWISE REPORTMISSING=NO
+  /GRAPHSPEC SOURCE=INLINE.
+BEGIN GPL
+  SOURCE: s=userSource(id("graphdataset"))
+  DATA: Dis1_1=col(source(s), name("Dis1_1"))
+  DATA: Dis2_1=col(source(s), name("Dis2_1"))
+  DATA: Type=col(source(s), name("Type"), unit.category())
+  GUIDE: axis(dim(1), label("Discriminant Scores from Function 1 for Analysis 1"))
+  GUIDE: axis(dim(2), label("Discriminant Scores from Function 2 for Analysis 1"))
+  GUIDE: legend(aesthetic(aesthetic.color.exterior), label("Type"))
+  ELEMENT: point(position(Dis1_1*Dis2_1), color.exterior(Type))
+END GPL.
+
+*Figure 16 code. In steps not shown, I copied the SCDFC table to Excel and then
+* converted to SPSS SAV file. So, this file is a table used as data. The figure
+* is a scatterplot with labels from Chart Builder and reference lines added in Chart Editor.  
+GET
+  FILE='C:\Users\tbabinec\Documents\KSBSPSSBOOK_DATA\chapter_discrim\wine_scdfc.sav'.
+DATASET NAME DataSet2 WINDOW=FRONT.
+DATASET ACTIVATE DataSet2.
+* Chart Builder.
+GGRAPH
+  /GRAPHDATASET NAME="graphdataset" VARIABLES=F1 F2 VARIABLE MISSING=LISTWISE REPORTMISSING=NO
+  /GRAPHSPEC SOURCE=INLINE.
+BEGIN GPL
+  SOURCE: s=userSource(id("graphdataset"))
+  DATA: F1=col(source(s), name("F1"))
+  DATA: F2=col(source(s), name("F2"))
+  DATA: VARIABLE=col(source(s), name("VARIABLE"), unit.category())
+  GUIDE: axis(dim(1), label("F1"))
+  GUIDE: axis(dim(2), label("F2"))
+  ELEMENT: point(position(F1*F2), label(VARIABLE))
+END GPL.
+*Figure 17 is Figure 15 post-processed in Chart Editor to add case number to point #159. 
+*.
+*I did not produce any figures with either of the following two sets of code.
+*syntax for scoring 1.
+compute cf1=57.351*alcohol+.854*malic_acid+39.031*ash
+ -.662*ash_alcalinity+.502*magnesium-3.261*total_phenols
+ +3.579*flavanoids+39.626*nonflavanoid_phenols+1.243*proanthocyanins
+ -3.988*color_intensity+27.600*hue+22.527*dilution
+ +.021*proline-523.443.
+compute cf2=52.373*alcohol+.134*malic_acid+28.029*ash
+ +.465*ash_alcalinity+.496*magnesium-1.061*total_phenols
+ +.075*flavanoids+41.418*nonflavanoid_phenols+2.970*proanthocyanins
+ -3.865*color_intensity+31.177*hue+18.445*dilution
+ -.00016*proline-427.199.
+compute cf3=54.127*alcohol+2.099*malic_acid+35.906*ash
+ +.554*ash_alcalinity+.485*magnesium+1.531*total_phenols
+ -9.235*flavanoids+28.223*nonflavanoid_phenols+2.317*proanthocyanins
+ -1.266*color_intensity+21.434*hue+13.554*dilution
+ -.00045*proline-453.783.
+compute pp1=exp(cf1)/( exp(cf1)+exp(cf2)+exp(cf3) ).
+compute pp2=exp(cf2)/( exp(cf1)+exp(cf2)+exp(cf3) ).
+compute pp3=exp(cf3)/( exp(cf1)+exp(cf2)+exp(cf3) ).
+execute.
+*syntax for scoring 2.
+DISCRIMINANT
+ /GROUPS=Type(1 3)
+ /VARIABLES=Alcohol Malic_Acid Ash 
+ Ash_Alcalinity Magnesium Total_Phenols 
+ Flavanoids Nonflavanoid_Phenols Proanthocyanins 
+ Color_Intensity Hue Dilution Proline
+ /SELECT Selectvar(1)
+ /ANALYSIS ALL
+ /SAVE=CLASS SCORES PROBS
+ /PRIORS SIZE
+ /STATISTICS=UNIVF BOXM COEFF RAW TABLE CROSSVALID
+ /PLOT=MAP
+ /CLASSIFY=NONMISSING POOLED.
+  
