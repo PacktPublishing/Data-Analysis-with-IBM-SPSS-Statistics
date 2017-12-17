@@ -29,7 +29,7 @@ IBM SPSS Statistics is available via trial download. However, the trial period i
 IBM SPSS Statistics is available via annual single-user license and various other licenses, and relatively recently, via a subscription.
 Price lists and terms probably vary by country.
 IBM SPSS Statistics is packaged as Base plus optional modules. We made an effort to only use only elements of SPSS Base.
-Detailed installation steps (software-wise) in theIBM SPSS Statistics installation documentation can be found at http:/​/​www-​01.​ibm.​com/​support/​docview.​wss? uid=​swg24041224.
+Detailed installation steps (software-wise) in theIBM SPSS Statistics installation documentation can be found at http://www-01.ibm.com/support/docview.wss?uid=swg24041224.
 
 ## Related Products
 * [IBM SPSS Modeler Cookbook](https://www.packtpub.com/big-data-and-business-intelligence/ibm-spss-modeler-cookbook?utm_source=github&utm_medium=repository&utm_campaign=9781849685467)
@@ -38,5 +38,4 @@ Detailed installation steps (software-wise) in theIBM SPSS Statistics installati
 
 * [Data Analysis with R](https://www.packtpub.com/big-data-and-business-intelligence/data-analysis-r?utm_source=github&utm_medium=repository&utm_campaign=9781785288142)
 
-### Suggestions and Feedback
-[Click here](https://docs.google.com/forms/d/e/1FAIpQLSe5qwunkGf6PUvzPirPDtuy1Du5Rlzew23UBp2S-P3wB-GcwQ/viewform) if you have any feedback or suggestions.
+
